@@ -1,4 +1,5 @@
 package com.example.expensetrackerapp.ui.theme
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.expensetrackerapp.db.AppDatabase
 import com.example.expensetrackerapp.db.Expense
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class AddEditExpenseActivity : ComponentActivity() {
@@ -44,6 +46,9 @@ fun AddEditExpenseScreen(
     val db = AppDatabase.getInstance(context)
     val dao = db.expenseDao()
     val scope = rememberCoroutineScope()
+
+    // ✅ Firebase logged user id
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
 
     var title by remember { mutableStateOf(initialExpense?.Exp_title ?: "") }
     var amount by remember { mutableStateOf(initialExpense?.Exp_Amount?.toString() ?: "") }
@@ -86,20 +91,26 @@ fun AddEditExpenseScreen(
                     onClick = {
                         scope.launch {
                             val amountInt = amount.toIntOrNull()
-                            if (title.isBlank() || amountInt == null) {
-                                // ممكن تحطي Snackbar / Toast
+
+                            if (title.isBlank() || amountInt == null || uid == null) {
                                 return@launch
                             }
 
                             if (isEdit && initialExpense != null) {
+
                                 val updated = initialExpense.copy(
                                     Exp_title = title,
-                                    Exp_Amount = amountInt
+                                    Exp_Amount = amountInt,
+                                    userId = uid
                                 )
+
                                 dao.updateExpense(updated)
+
                             } else {
+
                                 dao.insertExpense(
                                     Expense(
+                                        userId = uid,
                                         Exp_title = title,
                                         Exp_Amount = amountInt
                                     )

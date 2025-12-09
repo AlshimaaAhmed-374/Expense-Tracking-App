@@ -1,4 +1,5 @@
 package com.example.expensetrackerapp.ui.theme
+
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,11 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import com.example.expensetrackerapp.db.AppDatabase
 import com.example.expensetrackerapp.db.Expense
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class HomeUIActivity : ComponentActivity() {
 
-    // علشان نعمل refresh لما نرجع من Add/Edit
+    // refresh key to reload list after add/edit
     private val refreshKey = mutableStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,64 +38,76 @@ class HomeUIActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // كل مرة نرجع للأكتيفيتي دي نزود key → يعيد تحميل البيانات
         refreshKey.value++
     }
 }
 
 @Composable
 fun ExpenseHomeScreenContainer(refreshKey: Int) {
+
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val dao = db.expenseDao()
     val scope = rememberCoroutineScope()
 
+    // ✅ Firebase user id
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+
     var expenses by remember { mutableStateOf(listOf<Expense>()) }
 
-    // delete dialog state
+    // Delete dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
 
-    // كل ما refreshKey يتغير نعيد تحميل البيانات
-    LaunchedEffect(refreshKey) {
-        expenses = dao.getAllExpenses()
+    // ✅ Load ONLY the logged-in user's expenses
+    LaunchedEffect(refreshKey, uid) {
+        if (uid != null) {
+            expenses = dao.getExpensesForUser(uid)
+        }
     }
 
     ExpenseHomeScreen(
         expenses = expenses,
+
         onAddClick = {
-            // فتح Activity الإضافة
             val intent = Intent(context, AddEditExpenseActivity::class.java).apply {
                 putExtra("mode", "add")
             }
             context.startActivity(intent)
         },
+
         onEditClick = { expense ->
-            // فتح Activity التعديل وإرسال الـ Expense
             val intent = Intent(context, AddEditExpenseActivity::class.java).apply {
                 putExtra("mode", "edit")
-                putExtra("expense", expense) // Serializable
+                putExtra("expense", expense)
             }
             context.startActivity(intent)
         },
+
         onDeleteClick = { expense ->
             expenseToDelete = expense
             showDeleteDialog = true
         }
     )
 
-    // AlertDialog للحذف
+    // Delete dialog
     if (showDeleteDialog && expenseToDelete != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("Delete expense") },
             text = { Text("Are you sure you want to delete this expense?") },
+
             confirmButton = {
                 TextButton(
                     onClick = {
                         scope.launch {
                             dao.deleteExpense(expenseToDelete!!)
-                            expenses = dao.getAllExpenses()
+
+                            // ✅ Reload user expenses after delete
+                            if (uid != null) {
+                                expenses = dao.getExpensesForUser(uid)
+                            }
+
                             showDeleteDialog = false
                             expenseToDelete = null
                         }
@@ -102,11 +116,14 @@ fun ExpenseHomeScreenContainer(refreshKey: Int) {
                     Text("Delete")
                 }
             },
+
             dismissButton = {
-                TextButton(onClick = {
-                    showDeleteDialog = false
-                    expenseToDelete = null
-                }) {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        expenseToDelete = null
+                    }
+                ) {
                     Text("Cancel")
                 }
             }
@@ -121,6 +138,7 @@ fun ExpenseHomeScreen(
     onEditClick: (Expense) -> Unit,
     onDeleteClick: (Expense) -> Unit
 ) {
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClick) {
@@ -144,27 +162,32 @@ fun ExpenseHomeScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             if (expenses.isEmpty()) {
-                // عبارة ترحيبية لو مفيش بيانات
+
                 Text(
                     text = "No expenses yet.\nStart by adding your first expense!",
                     style = MaterialTheme.typography.bodyLarge
                 )
+
             } else {
-                // لست بالمصاريف
+
                 LazyColumn {
                     items(expenses) { expense ->
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
+
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
+
                             Column {
                                 Text(text = expense.Exp_title)
                                 Text(text = "Amount: ${expense.Exp_Amount}")
                             }
 
                             Row {
+
                                 IconButton(onClick = { onEditClick(expense) }) {
                                     Icon(
                                         imageVector = Icons.Filled.Edit,

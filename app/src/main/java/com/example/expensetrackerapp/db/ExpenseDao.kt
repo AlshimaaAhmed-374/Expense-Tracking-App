@@ -18,6 +18,6 @@ interface ExpenseDao {
     @Delete
     suspend fun deleteExpense(expense: Expense)
 
-    @Query("SELECT * FROM Expenses")
-    suspend fun getAllExpenses(): List<Expense>
+    @Query("SELECT * FROM expenses WHERE userId = :uid")
+    suspend fun getExpensesForUser(uid: String): List<Expense>
 }
