@@ -4,11 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
-import androidx.compose.material3.*
 import com.example.expensetrackerapp.auth.LoginScreen
 import com.example.expensetrackerapp.auth.RegisterScreen
-import com.example.expensetrackerapp.expenses.ExpenseActivity
+import com.example.expensetrackerapp.ui.theme.HomeUIActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,8 +16,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 AuthApp(
-                    onOpenExpenseActivity = {
-                        val intent = Intent(this, ExpenseActivity::class.java)
+                    onOpenHome = {
+                        val intent = Intent(this, HomeUIActivity::class.java)
                         startActivity(intent)
                     }
                 )
@@ -28,21 +28,23 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AuthApp(
-    onOpenExpenseActivity: () -> Unit
+    onOpenHome: () -> Unit
 ) {
     var currentScreen by remember { mutableStateOf("login") }
 
     when (currentScreen) {
         "login" -> LoginScreen(
             onLoginClick = { email, password ->
-                onOpenExpenseActivity()
+                // TODO: Validation / Auth
+                onOpenHome()
             },
             onGoToRegister = { currentScreen = "register" }
         )
 
         "register" -> RegisterScreen(
             onRegisterClick = { email, password ->
-                onOpenExpenseActivity()
+                // TODO: Register logic
+                onOpenHome()
             },
             onGoToLogin = { currentScreen = "login" }
         )
