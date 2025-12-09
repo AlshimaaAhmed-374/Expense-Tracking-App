@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ExpenseTrackerApp">
 
+        <activity android:name=".ui.theme.AddEditExpenseActivity" />
+        <activity android:name=".ui.theme.HomeUIActivity" />
+
         <!-- Expense Screen -->
         <activity
             android:name=".expenses.ExpenseActivity"
