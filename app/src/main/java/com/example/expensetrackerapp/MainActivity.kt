@@ -4,12 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import com.example.expensetrackerapp.auth.LoginScreen
@@ -17,14 +11,18 @@ import com.example.expensetrackerapp.auth.RegisterScreen
 import com.example.expensetrackerapp.ui.theme.HomeUIActivity
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             MaterialTheme {
                 AuthApp(
                     onOpenHome = {
-                        val intent = Intent(this, HomeUIActivity::class.java)
-                        startActivity(intent)
+                        startActivity(
+                            Intent(this, HomeUIActivity::class.java)
+                        )
+                        finish()
                     }
                 )
             }
@@ -39,20 +37,24 @@ fun AuthApp(
     var currentScreen by remember { mutableStateOf("login") }
 
     when (currentScreen) {
+
+        // ✅ LOGIN SCREEN
         "login" -> LoginScreen(
-            onLoginClick = { email, password ->
-                // TODO: Validation / Auth
+            onLoginSuccess = {
                 onOpenHome()
             },
-            onGoToRegister = { currentScreen = "register" }
+            onGoToRegister = {
+                currentScreen = "register"
+            }
         )
 
+        // ✅ REGISTER SCREEN
         "register" -> RegisterScreen(
-            onRegisterClick = { email, password ->
-                // TODO: Register logic
-                onOpenHome()
-            },
-            onGoToLogin = { currentScreen = "login" }
+            onGoToLogin = {
+                // RegisterScreen handles Firebase logic
+                // After success snackbar → go back to login
+                currentScreen = "login"
+            }
         )
     }
 }
