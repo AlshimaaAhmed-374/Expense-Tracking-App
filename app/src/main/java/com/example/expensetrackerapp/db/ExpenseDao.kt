@@ -6,6 +6,9 @@ import androidx.room.Dao
 @Dao
 interface ExpenseDao {
 
+    @Query("SELECT * FROM Expenses WHERE id = :id")
+    suspend fun getExpenseById(id: Int): Expense
+
     @Insert
     suspend fun insertExpense(expense: Expense)
 
