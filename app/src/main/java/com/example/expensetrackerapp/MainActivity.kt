@@ -4,15 +4,21 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.example.expensetrackerapp.auth.LoginScreen
 import com.example.expensetrackerapp.auth.RegisterScreen
+//import com.example.expensetrackerapp.auth.RegisterScreen
 import com.example.expensetrackerapp.expenses.ExpenseActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
             MaterialTheme {
                 AuthApp(
@@ -32,19 +38,19 @@ fun AuthApp(
 ) {
     var currentScreen by remember { mutableStateOf("login") }
 
-    when (currentScreen) {
-        "login" -> LoginScreen(
-            onLoginClick = { email, password ->
-                onOpenExpenseActivity()
-            },
-            onGoToRegister = { currentScreen = "register" }
-        )
-
-        "register" -> RegisterScreen(
-            onRegisterClick = { email, password ->
-                onOpenExpenseActivity()
-            },
-            onGoToLogin = { currentScreen = "login" }
-        )
+    // Center container
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        when (currentScreen) {
+            "login" -> LoginScreen(
+                onLoginSuccess = { onOpenExpenseActivity() },
+                onGoToRegister = { currentScreen = "register" }
+            )
+            "register" -> RegisterScreen(
+                onGoToLogin = { currentScreen = "login" }
+            )
+        }
     }
 }
