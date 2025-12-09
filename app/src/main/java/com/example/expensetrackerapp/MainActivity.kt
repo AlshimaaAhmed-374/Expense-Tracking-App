@@ -10,20 +10,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.*
 import com.example.expensetrackerapp.auth.LoginScreen
 import com.example.expensetrackerapp.auth.RegisterScreen
-//import com.example.expensetrackerapp.auth.RegisterScreen
-import com.example.expensetrackerapp.expenses.ExpenseActivity
+import com.example.expensetrackerapp.ui.theme.HomeUIActivity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             MaterialTheme {
                 AuthApp(
-                    onOpenExpenseActivity = {
-                        val intent = Intent(this, ExpenseActivity::class.java)
+                    onOpenHome = {
+                        val intent = Intent(this, HomeUIActivity::class.java)
                         startActivity(intent)
                     }
                 )
@@ -34,23 +34,25 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AuthApp(
-    onOpenExpenseActivity: () -> Unit
+    onOpenHome: () -> Unit
 ) {
     var currentScreen by remember { mutableStateOf("login") }
 
-    // Center container
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        when (currentScreen) {
-            "login" -> LoginScreen(
-                onLoginSuccess = { onOpenExpenseActivity() },
-                onGoToRegister = { currentScreen = "register" }
-            )
-            "register" -> RegisterScreen(
-                onGoToLogin = { currentScreen = "login" }
-            )
-        }
+    when (currentScreen) {
+        "login" -> LoginScreen(
+            onLoginClick = { email, password ->
+                // TODO: Validation / Auth
+                onOpenHome()
+            },
+            onGoToRegister = { currentScreen = "register" }
+        )
+
+        "register" -> RegisterScreen(
+            onRegisterClick = { email, password ->
+                // TODO: Register logic
+                onOpenHome()
+            },
+            onGoToLogin = { currentScreen = "login" }
+        )
     }
 }
