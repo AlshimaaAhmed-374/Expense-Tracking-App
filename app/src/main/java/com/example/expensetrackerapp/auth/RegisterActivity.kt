@@ -81,6 +81,7 @@ fun RegisterScreen(
                             errorMessage = "Passwords do not match"
                             return@Button
                         }
+
                         if (email.isBlank() || password.isBlank()) {
                             errorMessage = "Email and password cannot be empty"
                             return@Button
@@ -89,20 +90,18 @@ fun RegisterScreen(
                         isLoading = true
                         errorMessage = null
 
-                        FirebaseAuth.getInstance()
-                            .createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                isLoading = false
-                                if (task.isSuccessful) {
-                                    registrationSuccess = true // trigger snackbar
-                                } else {
-                                    errorMessage =
-                                        task.exception?.localizedMessage ?: "Registration failed"
-                                }
+                        FirebaseAuthHelper.registerUser(email, password) { success, user, error ->
+                            isLoading = false
+                            if (success) {
+                                registrationSuccess = true
+                            } else {
+                                errorMessage = error ?: "Registration failed"
                             }
+                        }
                     },
                     modifier = Modifier.fillMaxWidth()
-                ) {
+                )
+                {
                     if (isLoading) {
                         CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onPrimary,
