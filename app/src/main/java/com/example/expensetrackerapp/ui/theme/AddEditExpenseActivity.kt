@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.expensetrackerapp.db.AppDatabase
 import com.example.expensetrackerapp.db.Expense
+import com.example.expensetrackerapp.expenses.ExpenseService
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -45,6 +46,7 @@ fun AddEditExpenseScreen(
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val dao = db.expenseDao()
+    val manager = ExpenseService(dao)
     val scope = rememberCoroutineScope()
 
     // ✅ Firebase logged user id
@@ -90,34 +92,16 @@ fun AddEditExpenseScreen(
                 Button(
                     onClick = {
                         scope.launch {
-                            val amountInt = amount.toIntOrNull()
+                            val success = manager.saveExpense(
+                                initialExpense,
+                                title,
+                                amount,
+                                uid
+                            )
 
-                            if (title.isBlank() || amountInt == null || uid == null) {
-                                return@launch
+                            if (success) {
+                                onFinish()
                             }
-
-                            if (isEdit && initialExpense != null) {
-
-                                val updated = initialExpense.copy(
-                                    Exp_title = title,
-                                    Exp_Amount = amountInt,
-                                    userId = uid
-                                )
-
-                                dao.updateExpense(updated)
-
-                            } else {
-
-                                dao.insertExpense(
-                                    Expense(
-                                        userId = uid,
-                                        Exp_title = title,
-                                        Exp_Amount = amountInt
-                                    )
-                                )
-                            }
-
-                            onFinish()
                         }
                     }
                 ) {
