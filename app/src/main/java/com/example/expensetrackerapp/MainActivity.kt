@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import com.example.expensetrackerapp.auth.LoginScreen
@@ -19,9 +20,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 AuthApp(
                     onOpenHome = {
-                        startActivity(
-                            Intent(this, HomeUIActivity::class.java)
-                        )
+                        startActivity(Intent(this, HomeUIActivity::class.java))
                         finish()
                     }
                 )
@@ -36,25 +35,17 @@ fun AuthApp(
 ) {
     var currentScreen by remember { mutableStateOf("login") }
 
-    when (currentScreen) {
+    // Use Box + when to avoid illegal composable invocation
+    Box {
+        when (currentScreen) {
+            "login" -> LoginScreen(
+                onLoginSuccess = { onOpenHome() },
+                onGoToRegister = { currentScreen = "register" }
+            )
 
-        // ✅ LOGIN SCREEN
-        "login" -> LoginScreen(
-            onLoginSuccess = {
-                onOpenHome()
-            },
-            onGoToRegister = {
-                currentScreen = "register"
-            }
-        )
-
-        // ✅ REGISTER SCREEN
-        "register" -> RegisterScreen(
-            onGoToLogin = {
-                // RegisterScreen handles Firebase logic
-                // After success snackbar → go back to login
-                currentScreen = "login"
-            }
-        )
+            "register" -> RegisterScreen(
+                onGoToLogin = { currentScreen = "login" }
+            )
+        }
     }
 }
