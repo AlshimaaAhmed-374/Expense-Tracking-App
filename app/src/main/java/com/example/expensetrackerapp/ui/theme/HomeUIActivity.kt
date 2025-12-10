@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import com.example.expensetrackerapp.db.AppDatabase
 import com.example.expensetrackerapp.db.Expense
+import com.example.expensetrackerapp.expenses.ExpenseService
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -48,6 +49,8 @@ fun ExpenseHomeScreenContainer(refreshKey: Int) {
     val context = LocalContext.current
     val db = AppDatabase.getInstance(context)
     val dao = db.expenseDao()
+    val manager = ExpenseService(dao)
+
     val scope = rememberCoroutineScope()
 
     // ✅ Firebase user id
@@ -62,7 +65,7 @@ fun ExpenseHomeScreenContainer(refreshKey: Int) {
     // ✅ Load ONLY the logged-in user's expenses
     LaunchedEffect(refreshKey, uid) {
         if (uid != null) {
-            expenses = dao.getExpensesForUser(uid)
+            expenses = manager.getUserExpenses(uid)
         }
     }
 
@@ -101,11 +104,11 @@ fun ExpenseHomeScreenContainer(refreshKey: Int) {
                 TextButton(
                     onClick = {
                         scope.launch {
-                            dao.deleteExpense(expenseToDelete!!)
+                            manager.deleteExpense(expenseToDelete!!)
 
                             // ✅ Reload user expenses after delete
                             if (uid != null) {
-                                expenses = dao.getExpensesForUser(uid)
+                                expenses = manager.getUserExpenses(uid)
                             }
 
                             showDeleteDialog = false
