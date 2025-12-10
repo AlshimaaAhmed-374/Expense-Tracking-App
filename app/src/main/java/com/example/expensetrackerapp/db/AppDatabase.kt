@@ -5,7 +5,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import android.content.Context
 
-@Database(entities = [Expense::class], version = 1)
+@Database(entities = [Expense::class], version = 2)
 abstract class AppDatabase : RoomDatabase(){
     abstract fun expenseDao(): ExpenseDao
 
@@ -20,7 +20,9 @@ abstract class AppDatabase : RoomDatabase(){
                         context.applicationContext,
                         AppDatabase::class.java,
                         "expense_db"
-                    ).build()
+                    )
+                        .fallbackToDestructiveMigration(false) // <-- add this line
+                    .build()
                 }
             }
             return instance!!
