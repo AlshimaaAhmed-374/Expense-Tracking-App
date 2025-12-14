@@ -35,7 +35,6 @@ fun AuthApp(
 ) {
     var currentScreen by remember { mutableStateOf("login") }
 
-    // Use Box + when to avoid illegal composable invocation
     Box {
         when (currentScreen) {
             "login" -> LoginScreen(

@@ -49,7 +49,6 @@ fun AddEditExpenseScreen(
     val manager = ExpenseService(dao)
     val scope = rememberCoroutineScope()
 
-    // ✅ Firebase logged user id
     val uid = FirebaseAuth.getInstance().currentUser?.uid
 
     var title by remember { mutableStateOf(initialExpense?.Exp_title ?: "") }

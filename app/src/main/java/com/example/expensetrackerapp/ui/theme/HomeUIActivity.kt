@@ -24,7 +24,6 @@ import kotlinx.coroutines.launch
 
 class HomeUIActivity : ComponentActivity() {
 
-    // refresh key to reload list after add/edit
     private val refreshKey = mutableStateOf(0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,16 +52,13 @@ fun ExpenseHomeScreenContainer(refreshKey: Int) {
 
     val scope = rememberCoroutineScope()
 
-    // ✅ Firebase user id
     val uid = FirebaseAuth.getInstance().currentUser?.uid
 
     var expenses by remember { mutableStateOf(listOf<Expense>()) }
 
-    // Delete dialog
     var showDeleteDialog by remember { mutableStateOf(false) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
 
-    // ✅ Load ONLY the logged-in user's expenses
     LaunchedEffect(refreshKey, uid) {
         if (uid != null) {
             expenses = manager.getUserExpenses(uid)
@@ -93,7 +89,6 @@ fun ExpenseHomeScreenContainer(refreshKey: Int) {
         }
     )
 
-    // Delete dialog
     if (showDeleteDialog && expenseToDelete != null) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -106,7 +101,6 @@ fun ExpenseHomeScreenContainer(refreshKey: Int) {
                         scope.launch {
                             manager.deleteExpense(expenseToDelete!!)
 
-                            // ✅ Reload user expenses after delete
                             if (uid != null) {
                                 expenses = manager.getUserExpenses(uid)
                             }
